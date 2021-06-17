@@ -6,13 +6,13 @@ namespace steevanb\DevBundle\Service;
 
 use Doctrine\ORM\Tools\SchemaValidator;
 use steevanb\DevBundle\Exception\InvalidMappingException;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class ValidateSchemaService
 {
-    /** @var RegistryInterface */
+    /** @var Registry */
     protected $doctrine;
 
     /** @var KernelInterface */
@@ -37,7 +37,7 @@ class ValidateSchemaService
         'If association %s '
     );
 
-    public function __construct(RegistryInterface $doctrine, KernelInterface $kernel)
+    public function __construct(Registry $doctrine, KernelInterface $kernel)
     {
         $this->doctrine = $doctrine;
         $this->kernel = $kernel;
@@ -82,7 +82,7 @@ class ValidateSchemaService
     public function assertSchemaIsValid(): self
     {
         if ($this->needValidate()) {
-            foreach ($this->doctrine->getEntityManagers() as $managerName => $manager) {
+            foreach ($this->doctrine->getManagers() as $managerName => $manager) {
                 $validator = new SchemaValidator($manager);
                 foreach ($validator->validateMapping() as $entity => $errors) {
                     $this->assertAuthorizedMappingErrors($managerName, $entity, $errors);
