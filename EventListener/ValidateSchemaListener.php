@@ -6,7 +6,7 @@ namespace steevanb\DevBundle\EventListener;
 
 use steevanb\DevBundle\Service\ValidateSchemaService;
 use Symfony\Component\HttpKernel\{
-    Event\GetResponseEvent,
+    Event\RequestEvent,
     HttpKernelInterface
 };
 
@@ -24,14 +24,14 @@ class ValidateSchemaListener
         $this->disabledUrls = $disabledUrls;
     }
 
-    public function validateSchema(GetResponseEvent $event): void
+    public function validateSchema(RequestEvent $event): void
     {
         if ($this->needValidate($event)) {
             $this->validateSchema->assertSchemaIsValid();
         }
     }
 
-    protected function needValidate(GetResponseEvent $event): bool
+    protected function needValidate(RequestEvent $event): bool
     {
         $return = false;
 

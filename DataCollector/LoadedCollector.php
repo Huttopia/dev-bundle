@@ -31,7 +31,7 @@ class LoadedCollector extends DataCollector
         return 'loaded_data_collector';
     }
 
-    public function collect(Request $request, Response $response, \Exception $exception = null): void
+    public function collect(Request $request, Response $response, \Throwable $exception = null)
     {
         $this->data = [
             'declaredClasses' => get_declared_classes(),
