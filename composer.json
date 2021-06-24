@@ -8,10 +8,10 @@
     },
     "require": {
         "php": "^7.1",
-        "symfony/framework-bundle": "^4.0",
-        "symfony/translation": "^4.0",
-        "symfony/web-profiler-bundle": "^4.0",
-        "symfony/doctrine-bridge": "^4.0",
+        "symfony/framework-bundle": "^4.0|^5.3",
+        "symfony/translation": "^4.0|^5.3",
+        "symfony/web-profiler-bundle": "^4.0|^5.3",
+        "symfony/doctrine-bridge": "^4.0|^5.3",
         "doctrine/orm": "^2.5"
     },
     "repositories": [
