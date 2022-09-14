@@ -205,12 +205,11 @@ class LoadedCollector extends DataCollector
         $return = [];
         foreach ($this->container->get('event_dispatcher')->getListeners() as $eventId => $listeners) {
             $return[$eventId] = [];
-            if (is_array($listeners[0])) {
-                foreach ($listeners as $listener) {
+
+            foreach ($listeners as $listener) {
+                if (is_array($listener)) {
                     $return[$eventId][] = get_class($listener[0]);
-                }
-            } else {
-                foreach ($listeners as $listener) {
+                } else {
                     $return[$eventId][] = get_class($listener);
                 }
             }
