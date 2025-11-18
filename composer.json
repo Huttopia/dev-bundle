@@ -7,12 +7,11 @@
         "psr-4": { "steevanb\\DevBundle\\": "" }
     },
     "require": {
-        "php": "^7.1",
-        "symfony/framework-bundle": "^4.0",
-        "symfony/translation": "^4.0",
-        "symfony/web-profiler-bundle": "^4.0",
-        "symfony/doctrine-bridge": "^4.0",
-        "doctrine/orm": "^2.5"
+        "php": "^8.2",
+        "symfony/framework-bundle": "^7.3",
+        "symfony/translation": "^7.3",
+        "symfony/web-profiler-bundle": "^7.3",
+        "doctrine/orm": "^2.7"
     },
     "repositories": [
         {
