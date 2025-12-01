@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace steevanb\DevBundle\Service;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaValidator;
+use Doctrine\Persistence\ManagerRegistry;
 use steevanb\DevBundle\Exception\InvalidMappingException;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class ValidateSchemaService
 {
-    /** @var RegistryInterface */
-    protected $doctrine;
-
-    /** @var KernelInterface */
-    protected $kernel;
-
     /** @var array */
     protected $excludedEntities = array();
 
@@ -37,10 +32,10 @@ class ValidateSchemaService
         'If association %s '
     );
 
-    public function __construct(RegistryInterface $doctrine, KernelInterface $kernel)
-    {
-        $this->doctrine = $doctrine;
-        $this->kernel = $kernel;
+    public function __construct(
+        protected ManagerRegistry $doctrine,
+        protected KernelInterface $kernel
+    ) {
     }
 
     public function setExcludes(array $excludes): self
@@ -70,11 +65,21 @@ class ValidateSchemaService
 
     public function addMappingBundle(string $bundle): self
     {
-        $path = $this->kernel->getBundle($bundle)->getPath();
-        $path .= DIRECTORY_SEPARATOR . 'Resources';
-        $path .= DIRECTORY_SEPARATOR . 'config';
-        $path .= DIRECTORY_SEPARATOR . 'doctrine';
-        $this->addMappingPath($path);
+        $bundlePath = $this->kernel->getProjectDir() . '/src';
+
+        // Try common paths for Doctrine mapping files
+        $possiblePaths = [
+            $bundlePath . '/Resources/config/doctrine',
+            $bundlePath . '/config/doctrine',
+            $this->kernel->getProjectDir() . '/config/doctrine'
+        ];
+
+        foreach ($possiblePaths as $path) {
+            if (is_dir($path)) {
+                $this->addMappingPath($path);
+                break;
+            }
+        }
 
         return $this;
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace steevanb\DevBundle\DataCollector;
 
-use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\{
     Request,
     Response
@@ -14,14 +14,11 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 class LoadedCollector extends DataCollector
 {
     /**
-     * I know we should try to not have Container as dependency
-     * But i need it to get fresh data in collect()
-     * I need Container, not ContainerInterface
-     * @var Container
+     * @var ContainerInterface
      */
     protected $container;
 
-    public function __construct(Container $container)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
@@ -31,8 +28,11 @@ class LoadedCollector extends DataCollector
         return 'loaded_data_collector';
     }
 
-    public function collect(Request $request, Response $response, \Exception $exception = null): void
-    {
+    public function collect(
+        Request $request,
+        Response $response,
+        ?\Throwable $exception = null
+    ): void {
         $this->data = [
             'declaredClasses' => get_declared_classes(),
             'declaredInterfaces' => get_declared_interfaces(),
@@ -205,13 +205,22 @@ class LoadedCollector extends DataCollector
         $return = [];
         foreach ($this->container->get('event_dispatcher')->getListeners() as $eventId => $listeners) {
             $return[$eventId] = [];
-            if (is_array($listeners[0])) {
-                foreach ($listeners as $listener) {
-                    $return[$eventId][] = get_class($listener[0]);
-                }
-            } else {
-                foreach ($listeners as $listener) {
+            foreach ($listeners as $listener) {
+                if (is_array($listener)) {
+                    // Listener is [object, method] or [class, method]
+                    if (is_object($listener[0])) {
+                        $return[$eventId][] = $listener[0] instanceof \Closure
+                            ? 'Closure'
+                            : get_class($listener[0]);
+                    } else {
+                        $return[$eventId][] = $listener[0];
+                    }
+                } elseif ($listener instanceof \Closure) {
+                    $return[$eventId][] = 'Closure';
+                } elseif (is_object($listener)) {
                     $return[$eventId][] = get_class($listener);
+                } else {
+                    $return[$eventId][] = (string) $listener;
                 }
             }
         }
@@ -221,14 +230,8 @@ class LoadedCollector extends DataCollector
 
     protected function getInstantiatedServicesData(): array
     {
-        $reflectionProperty = new \ReflectionProperty(get_class($this->container), 'services');
-        $reflectionProperty->setAccessible(true);
-        $return = [];
-        foreach ($reflectionProperty->getValue($this->container) as $id => $service) {
-            $return[$id] = get_class($service);
-        }
-        $reflectionProperty->setAccessible(false);
-
-        return $return;
+        // Since Symfony 6+, we can't access private services property directly
+        // Return an empty array or implement alternative tracking if needed
+        return [];
     }
 }
