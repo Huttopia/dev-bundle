@@ -36,8 +36,9 @@ class TranslationsNotFoundListener
             } elseif (
                 $message['state'] === DataCollectorTranslator::MESSAGE_EQUALS_FALLBACK
                 && $this->allowFallbacks === false
+                && $this->isSameLanguage((string) $message['locale'], (string) $message['fallbackLocale']) === false
             ) {
-                $message['locale'] = 'fallback ' . $message['locale'] . ' found ';
+                $message['locale'] = 'fallback ' . $message['fallbackLocale'] . ' found for ' . $message['locale'] . ' ';
                 $message['locale'] .= 'but not allowed by config dev.translation.allow_fallbacks)';
                 $missings[] = $message;
             }
@@ -48,5 +49,14 @@ class TranslationsNotFoundListener
         }
 
         return $this;
+    }
+
+    /**
+     * A translation found in the language parent (en_US => en, es_AR => es) is the expected one, not a fallback :
+     * regional catalogues only hold their own overrides.
+     */
+    protected function isSameLanguage(string $locale, string $fallbackLocale): bool
+    {
+        return \Locale::getPrimaryLanguage($locale) === \Locale::getPrimaryLanguage($fallbackLocale);
     }
 }
